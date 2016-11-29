@@ -7,7 +7,7 @@ using System.Web.Http;
 
 namespace ProductsApp.Models
 {
-    public class user
+    public class User
     {
         public int Id { get; set; }
         public string nick { get; set; }
@@ -18,6 +18,7 @@ namespace ProductsApp.Models
         public string avatar { get; set; }
         public string url { get; set; }
         public string bio { get; set; }
+        public int venue { get; set; }
         public string password { get; set; }
         public string salt { get; set; }
     }

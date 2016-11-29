@@ -1,35 +1,19 @@
-﻿//deployment credentials: un: dionysdev pw: 0Blivion
-
-
-using ProductsApp.Models;
+﻿using ProductsApp.Models;
+using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
-using MySql.Data;
-using MySql.Data.MySqlClient;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Web.Http;
-using System.Diagnostics;
-using System.Web.Http.Description;
 
 namespace ProductsApp.Controllers
 {
-    [RoutePrefix("api/venues")]
+    [RoutePrefix("api/users")]
     public class UsersController : ApiController
     {
-
-        List<user> users = new List<user>();
-        List<Venue> venues = new List<Venue>();
-
-
-        /*Product[] products = new Product[]
-        {
-            new Product { Id = 1, Name = "Tomato Soup", Category = "Groceries", Price = 1 },
-            new Product { Id = 2, Name = "Yo-yo", Category = "Toys", Price = 3.75M },
-            new Product { Id = 3, Name = "Hammer", Category = "Hardware", Price = 16.99M },
-            new Product { Id = 4, Name = "Leka", Category = "Rautaa", Price = 32.55M },
-            new Product { Id = 5, Name = "Error field", Category = "Ebin", Price = 404 }
-        };*/
+        List<User> users = new List<User>();
+        List<User> patrons = new List<User>();
 
         public MySqlConnection connect;
 
@@ -40,25 +24,20 @@ namespace ProductsApp.Controllers
             DATABASE = "dionys";
 
         private static string ConnStr = "server=" + SERVER + "database=" + DATABASE + "; user=" + UID + "password=" + PASSWORD;
-    
-        public UsersController()
-        {
-            try
-            {
-                connect = new MySqlConnection(ConnStr);
-                connect.Open();
-                FetchData(connect);
-            }
-            catch (MySqlException)
-            {
 
-                throw;
-            }
+/*        public UsersController()
+        {
+            System.Diagnostics.Debug.WriteLine("Konstruktorissa");
+            connect = new MySqlConnection(ConnStr);
+            connect.Open();
+            FetchData(connect);
         }
 
         public void FetchData(MySqlConnection conn)
         {
-           /* MySqlCommand cmd;
+            users.Clear();
+
+            MySqlCommand cmd;
             string query = "Select * from dionys.users;";
             cmd = new MySqlCommand(query, conn);
             MySqlDataReader reader;
@@ -66,8 +45,9 @@ namespace ProductsApp.Controllers
 
             while (reader.Read())
             {
-                users.Add(new user
+                users.Add(new User
                 {
+                    Id = reader.GetInt32(0),
                     nick = reader.GetString(1),
                     fname = reader.GetString(2),
                     lname = reader.GetString(3),
@@ -76,75 +56,89 @@ namespace ProductsApp.Controllers
                     avatar = reader.GetString(6),
                     url = reader.GetString(7),
                     bio = reader.GetString(8),
-                    password = reader.GetString(9),
-                    salt = reader.GetString(10),
-                    Id = reader.GetInt32(0),
+                    venue = reader.GetInt32(9),
+                    password = reader.GetString(10),
+                    salt = reader.GetString(11),
+                    
 
                 });
             }
-
             reader.Close();
             conn.Close();
-            */
+        }
+*/
+        public void FetchUsers(MySqlConnection conn, int id)
+        {
+            users.Clear();
 
-            MySqlCommand cmd;
-            string query = "Select * from dionys.venues;";
-            cmd = new MySqlCommand(query, conn);
-            MySqlDataReader reader;
-            reader = cmd.ExecuteReader();
-
+            try
+            {
+                MySqlCommand cmd;
+                string query = "Select * from dionys.users WHERE venue_key = " + id + ";";
+                cmd = new MySqlCommand(query, conn);
+                MySqlDataReader reader;
+                reader = cmd.ExecuteReader();
+            
             while (reader.Read())
             {
-                Console.WriteLine(reader.GetString(2));
+                users.Add(new User
+                {
+                    Id = reader.GetInt32(0),
+                    nick = reader.GetString(1),
+                    fname = reader.GetString(2),
+                    lname = reader.GetString(3),
+                    sex = reader.GetBoolean(4),
+                    age = reader.GetInt32(5),
+                    avatar = reader.GetString(6),
+                    url = reader.GetString(7),
+                    bio = reader.GetString(8),
+                    venue = reader.GetInt32(9),
+                    password = reader.GetString(10),
+                    salt = reader.GetString(11),
+                    
 
-                venues.Add(new Venue
-                {                 
-                     Id = reader.GetInt32(1),
-                     name = reader.GetString(2),
-                     address = reader.GetString(3),
-                     lati = reader.GetDouble(4),
-                     longi = reader.GetDouble(5),
-                    desc = reader.GetString(6),
                 });
             }
-
             reader.Close();
             conn.Close();
 
-        }
+            }
+            catch (MySqlException ex)
+            {
+                throw ex;
+            }
 
-/*public IEnumerable<Product> GetAllProducts() {
-return products;
-}*/
+        }
 
         [Route("")]
-        public IEnumerable<Venue> GetAllVenues()
+        public IEnumerable<User> GetAllUsers()
         {
-            return venues;
+            return users;
         }
 
-        /* public IHttpActionResult GetProduct(int id) {
+        [HttpGet]
+        //[ActionName("SelectVenue")]
+        [Route("{venue:int}")]
+        public List<User> SelectVenue(int venue)
+        {
+            connect = new MySqlConnection(ConnStr);
+            connect.Open();
+            FetchUsers(connect, venue);
 
-             var product = products.FirstOrDefault((p) => p.Id == id);
-             if (product == null)
-             {
-                 return NotFound();
-             }
-             return Ok(product);
-         }*/
+            return users;
+        }
 
-        [Route("{id:int}")]
+        /*[Route("{id:int}")]
         //[ResponseType(typeof(user))]
         public IHttpActionResult GetVenue(int id)
         {
-            var venue = venues.FirstOrDefault((p) => p.Id == id);
+            var user = users.FirstOrDefault((p) => p.Id == id);
 
-            if(venue == null)
+            if(user == null)
             {
                 return NotFound();
             }
-            return Ok(venue);
-        }
-
+            return Ok(user);
+        }*/
     }
 }
