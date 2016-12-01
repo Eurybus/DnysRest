@@ -140,7 +140,7 @@ namespace ProductsApp.Controllers
             }
             return Ok(user);
         }*/
-        
+        [HttpPost]
         public void Post([FromBody]User user)
         {
             connect = new MySqlConnection(ConnStr);
@@ -170,6 +170,7 @@ namespace ProductsApp.Controllers
             }
             //return response;
         }
+        [HttpPut]
         public void Put(int id, [FromBody]User user)
         {
             //connect = new MySqlConnection(ConnStr);
