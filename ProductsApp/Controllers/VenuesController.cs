@@ -144,5 +144,14 @@ return products;
             return Ok(venue);
         }
 
+        public void AddNewData() {
+            connect.Open();
+        }
+        public void UpdateData() {
+            connect.Open();
+        }
+        public void DeleteData(int id) {
+            connect.Open();
+        }
     }
 }

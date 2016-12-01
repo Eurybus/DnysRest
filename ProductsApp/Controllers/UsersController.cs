@@ -140,5 +140,46 @@ namespace ProductsApp.Controllers
             }
             return Ok(user);
         }*/
+        
+        public void Post([FromBody]User user)
+        {
+            connect = new MySqlConnection(ConnStr);
+            string insert = "INSERT INTO dionys.users(nick,fname,lname,sex,age,pic_href,url,bio,venue_key,password_hash,salt)";
+            string values = "VALUES(@nick, @fname, @lname, @sex, @age, @pic_href, @url, @bio, @venue, @password, @salt);";
+            MySqlCommand cmd = new MySqlCommand(insert + values, connect);
+            cmd.Parameters.AddWithValue("@nick", user.nick);
+            cmd.Parameters.AddWithValue("@fname", user.fname);
+            cmd.Parameters.AddWithValue("@lname", user.lname);
+            cmd.Parameters.AddWithValue("@sex", user.sex);
+            cmd.Parameters.AddWithValue("@age", user.age);
+            cmd.Parameters.AddWithValue("@pic_href", user.avatar);
+            cmd.Parameters.AddWithValue("@url", user.url);
+            cmd.Parameters.AddWithValue("@bio", user.bio);
+            cmd.Parameters.AddWithValue("@venue", user.venue);
+            cmd.Parameters.AddWithValue("@password", user.password);
+            cmd.Parameters.AddWithValue("@salt", user.salt);
+
+            try
+            {
+                connect.Open();
+                cmd.ExecuteNonQuery();
+                connect.Close();
+            }
+            catch (Exception)
+            {
+            }
+            //return response;
+        }
+        public void Put(int id, [FromBody]User user)
+        {
+            //connect = new MySqlConnection(ConnStr);
+            string update = "UPDATE";
+            //return response;
+
+        }
+        public void Delete(int id)
+        {
+            //Delete stuff
+        }
     }
 }
