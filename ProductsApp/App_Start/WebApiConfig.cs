@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
 
-namespace dionys_rest
+namespace ProductsApp
 {
     public static class WebApiConfig
     {
