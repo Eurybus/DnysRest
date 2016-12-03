@@ -174,7 +174,7 @@ namespace ProductsApp.Controllers
         public void Put(int id, [FromBody]User user)
         {
             //connect = new MySqlConnection(ConnStr);
-            string update = "UPDATE";
+            //string update = "UPDATE";
             //return response;
 
         }
