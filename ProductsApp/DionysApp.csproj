@@ -119,6 +119,7 @@
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\UsersController.cs" />
+    <Compile Include="Controllers\InputController.cs" />
     <Compile Include="Controllers\VenuesController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -133,6 +134,8 @@
     <Content Include="ApplicationInsights.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="Properties\PublishProfiles\dionys-rest - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\dionys-rest - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\dionys-rest.pubxml" />
     <None Include="Properties\PublishProfiles\dionysrest.pubxml" />
     <None Include="Properties\PublishProfiles\Dnys.pubxml" />
