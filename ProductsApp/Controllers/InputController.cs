@@ -103,7 +103,6 @@ namespace ProductsApp.Controllers
             }
             catch (MySqlException ex)
             {
-                // Modifying FK value (venue_key fails)
                 throw ex;
             }
 

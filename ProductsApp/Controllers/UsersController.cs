@@ -67,9 +67,9 @@ namespace ProductsApp.Controllers
             conn.Close();
         }
 */
-        public void FetchUsers(MySqlConnection conn, int id)
+        public void FetchPatrons(MySqlConnection conn, int id)
         {
-            users.Clear();
+            patrons.Clear();
 
             try
             {
@@ -81,7 +81,7 @@ namespace ProductsApp.Controllers
             
             while (reader.Read())
             {
-                users.Add(new User
+                patrons.Add(new User
                 {
                     Id = reader.GetInt32(0),
                     nick = reader.GetString(1),
@@ -93,8 +93,8 @@ namespace ProductsApp.Controllers
                     url = reader.GetString(7),
                     bio = reader.GetString(8),
                     venue = reader.GetInt32(9),
-                    password = reader.GetString(10),
-                    salt = reader.GetString(11),
+                    //password = reader.GetString(10),
+                    //salt = reader.GetString(11),
                     
 
                 });
@@ -110,9 +110,56 @@ namespace ProductsApp.Controllers
 
         }
 
+        public void FetchAllUsers(MySqlConnection conn)
+        {
+            users.Clear();
+
+            try
+            {
+                MySqlCommand cmd;
+                string query = "Select * from dionys.users;";
+                cmd = new MySqlCommand(query, conn);
+                MySqlDataReader reader;
+                reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    users.Add(new User
+                    {
+                        Id = reader.GetInt32(0),
+                        nick = reader.GetString(1),
+                        fname = reader.GetString(2),
+                        lname = reader.GetString(3),
+                        sex = reader.GetBoolean(4),
+                        age = reader.GetInt32(5),
+                        avatar = reader.GetString(6),
+                        url = reader.GetString(7),
+                        bio = reader.GetString(8),
+                        venue = reader.GetInt32(9),
+                        //password = reader.GetString(10),
+                        //salt = reader.GetString(11),
+
+
+                    });
+
+                }
+                reader.Close();
+                conn.Close();
+
+            }
+            catch (MySqlException ex)
+            {
+
+                throw ex;
+            }
+        }
+
         [Route("")]
         public IEnumerable<User> GetAllUsers()
         {
+            connect = new MySqlConnection(ConnStr);
+            connect.Open();
+            FetchAllUsers(connect);
             return users;
         }
 
@@ -123,9 +170,9 @@ namespace ProductsApp.Controllers
         {
             connect = new MySqlConnection(ConnStr);
             connect.Open();
-            FetchUsers(connect, venue);
+            FetchPatrons(connect, venue);
 
-            return users;
+            return patrons;
         }
 
         /*[Route("{id:int}")]
