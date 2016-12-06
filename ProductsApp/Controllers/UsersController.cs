@@ -15,6 +15,8 @@ namespace ProductsApp.Controllers
         List<User> users = new List<User>();
         List<User> patrons = new List<User>();
 
+        private AuthorizationModule authmod;
+
         public MySqlConnection connect;
 
         private static string
@@ -157,10 +159,21 @@ namespace ProductsApp.Controllers
         [Route("")]
         public IEnumerable<User> GetAllUsers()
         {
-            connect = new MySqlConnection(ConnStr);
-            connect.Open();
-            FetchAllUsers(connect);
-            return users;
+            authmod = new AuthorizationModule();
+            string token = authmod.getToken(this.Request);
+            if(authmod.checkAPIKey(token))
+            {
+                connect = new MySqlConnection(ConnStr);
+                connect.Open();
+                FetchAllUsers(connect);
+                return users;
+            }
+            else
+            {
+                List<User> fail = new List<User>();
+                return fail;
+            }
+            
         }
 
         [HttpGet]
@@ -168,66 +181,23 @@ namespace ProductsApp.Controllers
         [Route("{venue:int}")]
         public List<User> SelectVenue(int venue)
         {
-            connect = new MySqlConnection(ConnStr);
-            connect.Open();
-            FetchPatrons(connect, venue);
-
-            return patrons;
-        }
-
-        /*[Route("{id:int}")]
-        //[ResponseType(typeof(user))]
-        public IHttpActionResult GetVenue(int id)
-        {
-            var user = users.FirstOrDefault((p) => p.Id == id);
-
-            if(user == null)
+            authmod = new AuthorizationModule();
+            string token = authmod.getToken(this.Request);
+            if (authmod.checkAPIKey(token))
             {
-                return NotFound();
-            }
-            return Ok(user);
-        }*/
-        [HttpPost]
-        public void Post([FromBody]User user)
-        {
-            connect = new MySqlConnection(ConnStr);
-            string insert = "INSERT INTO dionys.users(nick,fname,lname,sex,age,pic_href,url,bio,venue_key,password_hash,salt)";
-            string values = "VALUES(@nick, @fname, @lname, @sex, @age, @pic_href, @url, @bio, @venue, @password, @salt);";
-            MySqlCommand cmd = new MySqlCommand(insert + values, connect);
-            cmd.Parameters.AddWithValue("@nick", user.nick);
-            cmd.Parameters.AddWithValue("@fname", user.fname);
-            cmd.Parameters.AddWithValue("@lname", user.lname);
-            cmd.Parameters.AddWithValue("@sex", user.sex);
-            cmd.Parameters.AddWithValue("@age", user.age);
-            cmd.Parameters.AddWithValue("@pic_href", user.avatar);
-            cmd.Parameters.AddWithValue("@url", user.url);
-            cmd.Parameters.AddWithValue("@bio", user.bio);
-            cmd.Parameters.AddWithValue("@venue", user.venue);
-            cmd.Parameters.AddWithValue("@password", user.password);
-            cmd.Parameters.AddWithValue("@salt", user.salt);
-
-            try
-            {
+                connect = new MySqlConnection(ConnStr);
                 connect.Open();
-                cmd.ExecuteNonQuery();
-                connect.Close();
-            }
-            catch (Exception)
-            {
-            }
-            //return response;
-        }
-        [HttpPut]
-        public void Put(int id, [FromBody]User user)
-        {
-            //connect = new MySqlConnection(ConnStr);
-            //string update = "UPDATE";
-            //return response;
+                FetchPatrons(connect, venue);
 
+                return patrons; 
+            }
+            else
+            {
+                List<User> fail = new List<User>();
+                return fail;
+            }
         }
-        public void Delete(int id)
-        {
-            //Delete stuff
-        }
+
+        
     }
 }
