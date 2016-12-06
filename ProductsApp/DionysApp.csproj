@@ -118,6 +118,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="AuthorizationModule.cs" />
     <Compile Include="Controllers\UsersController.cs" />
     <Compile Include="Controllers\InputController.cs" />
     <Compile Include="Controllers\VenuesController.cs" />

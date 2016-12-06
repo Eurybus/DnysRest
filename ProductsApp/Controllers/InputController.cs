@@ -24,6 +24,7 @@ namespace ProductsApp.Controllers
 
         private static string ConnStr = "server=" + SERVER + "database=" + DATABASE + "; user=" + UID + "password=" + PASSWORD;
 
+        AuthorizationModule authmod;
         // GET api/<controller>
         public IEnumerable<string> Get()
         {
@@ -37,79 +38,92 @@ namespace ProductsApp.Controllers
         }
 
         // POST api/<controller>
-        public void Post([FromBody]User user)
+        public IHttpActionResult Post([FromBody]User user)
         {
-            MySqlConnection connect = new MySqlConnection(ConnStr);
-            string nameCheckQuery = "SELECT id FROM " + DATABASE + "." + TABLE + " Where nick = @nick;";
-            MySqlCommand nameCheckCmd = new MySqlCommand(nameCheckQuery, connect);
-            nameCheckCmd.Parameters.AddWithValue("@nick", user.nick);
 
-            string updateQuery = "UPDATE " + DATABASE + "." + TABLE + " SET pic_href = @pic_href, url = @url, bio = @bio, password_hash = @password, salt = @salt WHERE nick = @nick;";
-            string venueUpdateQuery = "SET foreign_key_checks = 0; UPDATE " + DATABASE + "." + TABLE + " SET venue_key = @venue WHERE nick = @nick; SET foreign_key_checks = 1";
-            MySqlCommand updateCmd = new MySqlCommand(updateQuery + venueUpdateQuery, connect);
-            
+            authmod = new AuthorizationModule();
+            string token = authmod.getToken(this.Request);
 
-            string insertQuery = "INSERT INTO dionys.users(nick,fname,lname,sex,age,pic_href,url,bio,venue_key,password_hash,salt)";
-            string insertValues = "VALUES(@nick, @fname, @lname, @sex, @age, @pic_href, @url, @bio, @venue, @password, @salt);";
-            MySqlCommand insertCmd = new MySqlCommand(insertQuery + insertValues);
-            try
+            if (authmod.checkAPIKey(token))
             {
-                MySqlDataReader reader;
-                connect.Open();
-                int id = 0;
-                reader = nameCheckCmd.ExecuteReader();
-                while (reader.Read())
-                {
-                    id = reader.GetInt32(0);
-                }
-                reader.Close();
-                if(id != 0)
-                {
-                    User inputUser = checkProperties(user);
+                MySqlConnection connect = new MySqlConnection(ConnStr);
+                string nameCheckQuery = "SELECT id FROM " + DATABASE + "." + TABLE + " Where nick = @nick;";
+                MySqlCommand nameCheckCmd = new MySqlCommand(nameCheckQuery, connect);
+                nameCheckCmd.Parameters.AddWithValue("@nick", user.nick);
 
-                    updateCmd.Parameters.AddWithValue("@nick", inputUser.nick);
-                    //updateCmd.Parameters.AddWithValue("@fname", user.fname);
-                    //updateCmd.Parameters.AddWithValue("@lname", user.lname);
-                    //updateCmd.Parameters.AddWithValue("@sex", user.sex);
-                    //updateCmd.Parameters.AddWithValue("@age", user.age);
-                    updateCmd.Parameters.AddWithValue("@pic_href", inputUser.avatar);
-                    updateCmd.Parameters.AddWithValue("@url", inputUser.url);
-                    updateCmd.Parameters.AddWithValue("@bio", inputUser.bio);
-                    updateCmd.Parameters.AddWithValue("@venue", inputUser.venue);
-                    updateCmd.Parameters.AddWithValue("@password", inputUser.password);
-                    updateCmd.Parameters.AddWithValue("@salt", user.salt);
+                string updateQuery = "UPDATE " + DATABASE + "." + TABLE + " SET pic_href = @pic_href, url = @url, bio = @bio, password_hash = @password, salt = @salt WHERE nick = @nick;";
+                string venueUpdateQuery = "SET foreign_key_checks = 0; UPDATE " + DATABASE + "." + TABLE + " SET venue_key = @venue WHERE nick = @nick; SET foreign_key_checks = 1";
+                MySqlCommand updateCmd = new MySqlCommand(updateQuery + venueUpdateQuery, connect);
 
-                    updateCmd.ExecuteNonQuery();
-                    connect.Close();
-                }
-                else
+
+                string insertQuery = "INSERT INTO dionys.users(nick,fname,lname,sex,age,pic_href,url,bio,venue_key,password_hash,salt)";
+                string insertValues = "VALUES(@nick, @fname, @lname, @sex, @age, @pic_href, @url, @bio, @venue, @password, @salt);";
+                MySqlCommand insertCmd = new MySqlCommand(insertQuery + insertValues);
+                try
                 {
-                    // User was not found in database, so let's create a new user
-                    insertCmd.Parameters.AddWithValue("@nick", user.nick);
-                    insertCmd.Parameters.AddWithValue("@fname", user.fname);
-                    insertCmd.Parameters.AddWithValue("@lname", user.lname);
-                    insertCmd.Parameters.AddWithValue("@sex", user.sex);
-                    insertCmd.Parameters.AddWithValue("@age", user.age);
-                    insertCmd.Parameters.AddWithValue("@pic_href", user.avatar);
-                    insertCmd.Parameters.AddWithValue("@url", user.url);
-                    insertCmd.Parameters.AddWithValue("@bio", user.bio);
-                    insertCmd.Parameters.AddWithValue("@venue", user.venue);
-                    insertCmd.Parameters.AddWithValue("@password", user.password);
-                    insertCmd.Parameters.AddWithValue("@salt", user.salt);
+                    MySqlDataReader reader;
+                    connect.Open();
+                    int id = 0;
+                    reader = nameCheckCmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        id = reader.GetInt32(0);
+                    }
+                    reader.Close();
+                    if (id != 0)
+                    {
+                        User inputUser = checkProperties(user);
 
-                    insertCmd.ExecuteNonQuery();
-                    connect.Close();
+                        updateCmd.Parameters.AddWithValue("@nick", inputUser.nick);
+                        //updateCmd.Parameters.AddWithValue("@fname", user.fname);
+                        //updateCmd.Parameters.AddWithValue("@lname", user.lname);
+                        //updateCmd.Parameters.AddWithValue("@sex", user.sex);
+                        //updateCmd.Parameters.AddWithValue("@age", user.age);
+                        updateCmd.Parameters.AddWithValue("@pic_href", inputUser.avatar);
+                        updateCmd.Parameters.AddWithValue("@url", inputUser.url);
+                        updateCmd.Parameters.AddWithValue("@bio", inputUser.bio);
+                        updateCmd.Parameters.AddWithValue("@venue", inputUser.venue);
+                        updateCmd.Parameters.AddWithValue("@password", inputUser.password);
+                        updateCmd.Parameters.AddWithValue("@salt", user.salt);
+
+                        updateCmd.ExecuteNonQuery();
+                        connect.Close();
+                        return Ok("Updated user's " + inputUser.nick + " info.");
+                    }
+                    else
+                    {
+                        // User was not found in database, so let's create a new user
+                        insertCmd.Parameters.AddWithValue("@nick", user.nick);
+                        insertCmd.Parameters.AddWithValue("@fname", user.fname);
+                        insertCmd.Parameters.AddWithValue("@lname", user.lname);
+                        insertCmd.Parameters.AddWithValue("@sex", user.sex);
+                        insertCmd.Parameters.AddWithValue("@age", user.age);
+                        insertCmd.Parameters.AddWithValue("@pic_href", user.avatar);
+                        insertCmd.Parameters.AddWithValue("@url", user.url);
+                        insertCmd.Parameters.AddWithValue("@bio", user.bio);
+                        insertCmd.Parameters.AddWithValue("@venue", user.venue);
+                        insertCmd.Parameters.AddWithValue("@password", user.password);
+                        insertCmd.Parameters.AddWithValue("@salt", user.salt);
+
+                        insertCmd.ExecuteNonQuery();
+                        connect.Close();
+                        return Ok("Created user " + user.nick);
+                    }
                 }
+                catch (MySqlException ex)
+                {
+                    return InternalServerError(ex);
+                } 
             }
-            catch (MySqlException ex)
+            else
             {
-                throw ex;
+                return Unauthorized();
             }
 
         }
 
         // PUT api/<controller>/5
-        public void Put(int id, [FromBody]string key, [FromBody]string value, [FromBody]string identifier, [FromBody]string nick)
+        /*public void Put(int id, [FromBody]string key, [FromBody]string value, [FromBody]string identifier, [FromBody]string nick)
         {
             string nickActual = "'" + nick + "'";
             string updateQuery = "UPDATE " + DATABASE + "." + TABLE + " SET " + key + " = " + value + "WHERE " + identifier + " = " + nickActual + ";";
@@ -130,7 +144,7 @@ namespace ProductsApp.Controllers
         // DELETE api/<controller>/5
         public void Delete(int id)
         {
-        }
+        }*/
 
         private User checkProperties(User user)
         {

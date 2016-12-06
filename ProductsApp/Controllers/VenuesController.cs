@@ -21,7 +21,7 @@ namespace ProductsApp.Controllers
         List<User> users = new List<User>();
         List<Venue> venues = new List<Venue>();
 
-
+        AuthorizationModule authmod = new AuthorizationModule();
         /*Product[] products = new Product[]
         {
             new Product { Id = 1, Name = "Tomato Soup", Category = "Groceries", Price = 1 },
@@ -118,7 +118,18 @@ return products;
         [Route("")]
         public IEnumerable<Venue> GetAllVenues()
         {
-            return venues;
+            authmod = new AuthorizationModule();
+            string token = authmod.getToken(this.Request);
+
+            if (authmod.checkAPIKey(token))
+            {
+                return venues; 
+            }
+            else
+            {
+                List<Venue> fail = new List<Venue>();
+                return fail;
+            }
         }
 
         /* public IHttpActionResult GetProduct(int id) {
@@ -135,13 +146,22 @@ return products;
         //[ResponseType(typeof(user))]
         public IHttpActionResult GetVenue(int id)
         {
-            var venue = venues.FirstOrDefault((p) => p.Id == id);
-
-            if(venue == null)
+            authmod = new AuthorizationModule();
+            string token = authmod.getToken(this.Request);
+            if (authmod.checkAPIKey(token))
             {
-                return NotFound();
+                var venue = venues.FirstOrDefault((p) => p.Id == id);
+
+                if (venue == null)
+                {
+                    return NotFound();
+                }
+                return Ok(venue); 
             }
-            return Ok(venue);
+            else
+            {
+                return Unauthorized();
+            }
         }
 
         public void AddNewData() {
